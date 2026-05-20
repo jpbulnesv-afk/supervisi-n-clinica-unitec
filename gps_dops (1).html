@@ -76,19 +76,40 @@
 
   function redirigir(lat,lng){limpiar();window.location.href=FORM_URL;}
 
+  function enviarGPS(lat,lng,acc){
+    // JSONP — único método 100% compatible sin CORS en móviles
+    var cbName='gps_cb_'+Date.now();
+    window[cbName]=function(data){
+      delete window[cbName];
+      if(script.parentNode)script.parentNode.removeChild(script);
+      setTimeout(function(){window.location.href=FORM_URL;},500);
+    };
+    var url=GPS_URL
+      +'?callback='+cbName
+      +'&form='+encodeURIComponent(FORM_NAME)
+      +'&lat='+lat.toFixed(6)
+      +'&lng='+lng.toFixed(6)
+      +'&acc='+acc
+      +'&sid='+encodeURIComponent(sessionID);
+    var script=document.createElement('script');
+    script.src=url;
+    script.onerror=function(){
+      delete window[cbName];
+      setTimeout(function(){window.location.href=FORM_URL;},500);
+    };
+    // Timeout fallback
+    setTimeout(function(){
+      if(window[cbName]){delete window[cbName];window.location.href=FORM_URL;}
+    },4000);
+    document.head.appendChild(script);
+  }
+
   function onExito(pos){
     if(yaResuelto)return;yaResuelto=true;limpiar();
     var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
     document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
     ui('ok','Precisión: ±'+acc+' m');
-    // Enviar GPS al Apps Script usando imagen (sin restricciones CORS)
-    var url=GPS_URL+'?form='+encodeURIComponent(FORM_NAME)+'&lat='+lat.toFixed(6)+'&lng='+lng.toFixed(6)+'&acc='+acc+'&sid='+encodeURIComponent(sessionID);
-    var img=new Image();
-    img.onload=function(){setTimeout(function(){window.location.href=FORM_URL;},500);};
-    img.onerror=function(){setTimeout(function(){window.location.href=FORM_URL;},500);};
-    img.src=url;
-    // Fallback por si la imagen tarda mucho
-    setTimeout(function(){window.location.href=FORM_URL;},3000);
+    enviarGPS(lat,lng,acc);
   }
 
   function onError(err){
