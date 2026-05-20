@@ -81,15 +81,14 @@
     var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
     document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
     ui('ok','Precisión: ±'+acc+' m');
-    // Enviar GPS al Apps Script
+    // Enviar GPS al Apps Script usando imagen (sin restricciones CORS)
     var url=GPS_URL+'?form='+encodeURIComponent(FORM_NAME)+'&lat='+lat.toFixed(6)+'&lng='+lng.toFixed(6)+'&acc='+acc+'&sid='+encodeURIComponent(sessionID);
-    var xhr=new XMLHttpRequest();
-    xhr.open('GET',url,true);
-    xhr.timeout=5000;
-    xhr.onloadend=function(){setTimeout(function(){window.location.href=FORM_URL;},1000);};
-    xhr.ontimeout=function(){window.location.href=FORM_URL;};
-    xhr.onerror=function(){window.location.href=FORM_URL;};
-    xhr.send();
+    var img=new Image();
+    img.onload=function(){setTimeout(function(){window.location.href=FORM_URL;},500);};
+    img.onerror=function(){setTimeout(function(){window.location.href=FORM_URL;},500);};
+    img.src=url;
+    // Fallback por si la imagen tarda mucho
+    setTimeout(function(){window.location.href=FORM_URL;},3000);
   }
 
   function onError(err){
