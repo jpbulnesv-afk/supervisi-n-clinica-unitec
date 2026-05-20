@@ -13,7 +13,7 @@
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-lt),var(--teal));}
     .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.3);color:var(--teal-lt);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;padding:4px 12px;border-radius:100px;margin-bottom:1.5rem;}
     .icon-wrap{width:72px;height:72px;background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.25);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.25rem;}
-    .spinner{display:none;width:48px;height:48px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1.5rem;}
+    .spinner{display:none;width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1.5rem;}
     @keyframes spin{to{transform:rotate(360deg);}}
     h1{color:var(--text);font-size:1.2rem;font-weight:600;margin-bottom:.5rem;}
     .form-label{display:inline-block;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--teal-lt);letter-spacing:.06em;margin-bottom:1rem;}
@@ -46,20 +46,22 @@
       <li>Vuelve aquí y toca <b>Reintentar</b></li>
     </ol>
   </div>
-  <p id="message">Toca el botón y <strong style="color:var(--text)">acepta el permiso</strong> de ubicación. Luego serás redirigido al formulario automáticamente.</p>
+  <p id="message">Toca el botón y <strong style="color:var(--text)">acepta el permiso</strong> de ubicación. Serás redirigido al formulario automáticamente.</p>
   <div class="coords-box" id="coordsBox">📍 <span id="coordsText"></span></div>
   <button class="btn" id="mainBtn" onclick="pedirUbicacion()">📍 Compartir ubicación</button>
   <button class="btn-skip" id="skipBtn" onclick="redirigir(null,null)">Continuar sin ubicación →</button>
   <div class="status" id="status"></div>
 </div>
 <script>
-  var FORM_URL   = "https://forms.cloud.microsoft/r/MQAFtGb9TQ";
-  var GPS_URL    = "https://script.google.com/macros/s/AKfycbwbn0K7yhfm5g_97OkFjFdYjNvebfVh6g6jCeQjzJgxazpXozUJeXxRVSd4lKVpnFc8/exec";
-  var FORM_NAME  = "DOPS";
+  // ══════════════════════════════════════════════
+  // CONFIGURACIÓN — igual que tu código original
+  // ══════════════════════════════════════════════
+  var FORM_URL = "https://forms.cloud.microsoft/r/MQAFtGb9TQ";
+  var GPS_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1zEoRm4ryh849OKRai1iYWQFmIgVD4PJPuy1a0-Crur9fzA/viewform?usp=pp_url&entry.558213725=";
+  // ══════════════════════════════════════════════
 
   var intentos=0,MAX=3,watchId=null,yaResuelto=false,timerIOS=null;
   var esIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  var sessionID = 'S-' + Date.now().toString(36).toUpperCase();
 
   function ui(estado,texto){
     var iw=document.getElementById('iconWrap'),sp=document.getElementById('spinner'),
@@ -69,77 +71,33 @@
         cb=document.getElementById('coordsBox');
     ios.style.display='none';skip.style.display='none';cb.style.display='none';st.className='status';
     if(estado==='buscando'){iw.style.display='none';sp.style.display='block';tit.textContent='Obteniendo ubicación…';msg.textContent=esIOS?'Toca "Permitir" cuando Safari pregunte.':'Mantén la pantalla abierta.';btn.disabled=true;btn.textContent='⏳ Buscando…';st.textContent=texto||'';}
-    if(estado==='guardando'){iw.style.display='none';sp.style.display='block';tit.textContent='Guardando ubicación…';msg.textContent='Un momento, registrando tu ubicación.';btn.disabled=true;btn.textContent='⏳ Guardando…';}
     if(estado==='error'){iw.style.display='flex';iw.textContent='⚠️';sp.style.display='none';tit.textContent='No se pudo obtener la ubicación';msg.innerHTML=texto||'Ocurrió un error.';btn.disabled=false;btn.textContent='🔄 Reintentar';skip.style.display='block';st.className='status err';st.textContent='Intento '+intentos+'/'+MAX;if(esIOS)ios.style.display='block';}
-    if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación guardada!';msg.textContent='Redirigiendo al formulario DOPS…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}
+    if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación obtenida!';msg.textContent='Redirigiendo al formulario DOPS…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}
   }
 
   function limpiar(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}if(timerIOS!==null){clearTimeout(timerIOS);timerIOS=null;}}
 
-        function guardarGPS(lat, lng, acc) {
-    ui('guardando');
-    // Enviar a Google Forms de forma invisible (iframe oculto)
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://docs.google.com/forms/d/e/1FAIpQLSe1zEoRm4ryh849OKRai1iYWQFmIgVD4PJPuy1a0-Crur9fzA/formResponse';
-    form.target = 'gps_iframe';
-    form.style.display = 'none';
-
-    var fields = [
-      ['entry.53447246', FORM_NAME],
-      ['entry.558213725',  lat.toFixed(6)],
-      ['entry.1251424585',  lng.toFixed(6)],
-      ['entry.1528347380',  String(acc)],
-      ['entry.594975629',  sessionID]
-    ];
-
-    fields.forEach(function(f) {
-      var input = document.createElement('input');
-      input.type  = 'hidden';
-      input.name  = f[0];
-      input.value = f[1];
-      form.appendChild(input);
-    });
-
-    // Iframe oculto para recibir la respuesta sin redirigir
-    var iframe = document.getElementById('gps_iframe');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.name = 'gps_iframe';
-      iframe.id   = 'gps_iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
+  function redirigir(lat,lng){
+    limpiar();
+    // Igual que tu código original — coordenadas en la URL
+    var coords = (lat!=null&&lng!=null) ? lat.toFixed(6)+","+lng.toFixed(6) : "";
+    // Primero guarda GPS en Google Forms, luego abre Microsoft Forms
+    if(coords){
+      // Guardar GPS en background y redirigir a Microsoft Forms
+      var img = new Image();
+      img.src = GPS_FORM_URL + encodeURIComponent(coords);
+      setTimeout(function(){ window.location.href = FORM_URL; }, 500);
+    } else {
+      window.location.href = FORM_URL;
     }
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    // Mostrar confirmación y redirigir
-    setTimeout(function() {
-      document.getElementById('coordsBox').style.display = 'block';
-      document.getElementById('coordsText').textContent  = lat.toFixed(6) + ', ' + lng.toFixed(6);
-      ui('ok', 'Precisión: ±' + acc + ' m · ID: ' + sessionID);
-      setTimeout(function() { window.location.href = FORM_URL; }, 2000);
-    }, 800);
   }
-
-  function showSaved(lat, lng, acc) {
-    document.getElementById('coordsBox').style.display = 'block';
-    document.getElementById('coordsText').textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
-    ui('ok', 'Precisión: ±' + acc + ' m · ID: ' + sessionID);
-    setTimeout(function(){ window.location.href = FORM_URL; }, 2000);
-  }
-
-  
-
-  
-
-  function redirigir(lat,lng){limpiar();window.location.href=FORM_URL;}
 
   function onExito(pos){
     if(yaResuelto)return;yaResuelto=true;limpiar();
-    guardarGPS(pos.coords.latitude,pos.coords.longitude,Math.round(pos.coords.accuracy));
+    var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
+    document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
+    ui('ok','Precisión: ±'+acc+' m');
+    setTimeout(function(){redirigir(lat,lng);},1200);
   }
 
   function onError(err){
