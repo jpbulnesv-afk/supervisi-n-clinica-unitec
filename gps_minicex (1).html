@@ -76,22 +76,44 @@
 
   function limpiar(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}if(timerIOS!==null){clearTimeout(timerIOS);timerIOS=null;}}
 
-    function guardarGPS(lat,lng,acc){
+      function guardarGPS(lat,lng,acc){
     ui('guardando');
-    var url=GPS_URL+'?form='+FORM_NAME+'&lat='+lat.toFixed(6)+'&lng='+lng.toFixed(6)+'&acc='+acc+'&sid='+sessionID;
-    fetch(url,{method:'GET',mode:'no-cors'})
-      .then(function(){
-        ui('ok','Precisión: ±'+acc+' m · ID: '+sessionID);
-        document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
-        setTimeout(function(){window.location.href=FORM_URL;},1800);
-      })
-      .catch(function(){
-        // no-cors siempre llega aquí pero el dato se guardó
-        ui('ok','Precisión: ±'+acc+' m · ID: '+sessionID);
-        document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
-        setTimeout(function(){window.location.href=FORM_URL;},1800);
-      });
+    var ts = Date.now();
+    var url = GPS_URL
+      + '?form='  + encodeURIComponent(FORM_NAME)
+      + '&lat='   + lat.toFixed(6)
+      + '&lng='   + lng.toFixed(6)
+      + '&acc='   + acc
+      + '&sid='   + encodeURIComponent(sessionID)
+      + '&_ts='   + ts;
+
+    // Método 1: XMLHttpRequest (más compatible que fetch en webviews móviles)
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.timeout = 8000;
+    xhr.onloadend = function() {
+      showSaved(lat, lng, acc);
+    };
+    xhr.ontimeout = function() {
+      showSaved(lat, lng, acc);
+    };
+    xhr.onerror = function() {
+      // Método 2: imagen como fallback
+      var img = new Image();
+      img.src = url;
+      setTimeout(function(){ showSaved(lat, lng, acc); }, 1500);
+    };
+    xhr.send();
   }
+
+  function showSaved(lat, lng, acc) {
+    document.getElementById('coordsBox').style.display = 'block';
+    document.getElementById('coordsText').textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+    ui('ok', 'Precisión: ±' + acc + ' m · ID: ' + sessionID);
+    setTimeout(function(){ window.location.href = FORM_URL; }, 2000);
+  }
+
+  
 
   
 
