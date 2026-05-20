@@ -3,65 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>OMP · Pediatría UNITEC</title>
+  <title>Mini-CEX · Pediatría UNITEC</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0a1628; --surface: #111f38; --border: #1e3a5f;
-      --text: #e2e8f0; --muted: #64748b;
-      --success: #34d399; --warn: #fbbf24; --danger: #f87171;
-      --accent: #d97706; --accent-lt: #f59e0b;
-    }
-    body {
-      font-family: 'DM Sans', sans-serif; background: var(--bg);
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 1.25rem;
-      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(217,119,6,.15) 0%, transparent 70%);
-    }
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 24px; padding: 2.5rem 2rem 2rem;
-      max-width: 360px; width: 100%; text-align: center;
-      box-shadow: 0 32px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04) inset;
-      position: relative; overflow: hidden;
-    }
-    .card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-lt), var(--accent));
-    }
-    .badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(217,119,6,.15); border: 1px solid rgba(217,119,6,.3);
-      color: var(--accent-lt); font-family: 'DM Mono', monospace;
-      font-size: .7rem; letter-spacing: .08em;
-      padding: 4px 12px; border-radius: 100px; margin-bottom: 1.5rem;
-    }
-    .icon-wrap {
-      width: 72px; height: 72px; background: rgba(217,119,6,.12);
-      border: 1px solid rgba(217,119,6,.25); border-radius: 20px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem; margin: 0 auto 1.25rem;
-    }
-    .spinner {
-      display: none; width: 48px; height: 48px;
-      border: 3px solid var(--border); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1.5rem;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    h1 { color: var(--text); font-size: 1.2rem; font-weight: 600; margin-bottom: .5rem; }
-    .form-label { display: inline-block; font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--accent-lt); letter-spacing: .06em; margin-bottom: 1rem; }
-    p { color: var(--muted); font-size: .875rem; line-height: 1.65; margin-bottom: 1.75rem; }
-    .coords-box { display: none; background: rgba(0,0,0,.3); border: 1px solid var(--border); border-radius: 12px; padding: .75rem 1rem; margin-bottom: 1.25rem; font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--success); }
-    .btn { width: 100%; padding: 1rem 1.5rem; background: linear-gradient(135deg, var(--accent), #b45309); color: #fff; border: none; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 600; cursor: pointer; transition: opacity .2s, transform .12s; box-shadow: 0 4px 24px rgba(217,119,6,.35); -webkit-tap-highlight-color: transparent; }
-    .btn:active { opacity: .85; transform: scale(.98); }
-    .btn:disabled { background: #1e3a5f; box-shadow: none; color: var(--muted); cursor: not-allowed; }
-    .btn-skip { display: none; width: 100%; padding: .75rem; background: transparent; border: 1px solid var(--border); border-radius: 12px; color: var(--muted); font-size: .85rem; cursor: pointer; margin-top: .75rem; -webkit-tap-highlight-color: transparent; }
-    .status { font-size: .78rem; color: var(--muted); margin-top: .9rem; min-height: 1.1rem; }
-    .status.ok { color: var(--success); } .status.err { color: var(--danger); }
-    .ios-guide { display: none; background: rgba(251,191,36,.07); border: 1px solid rgba(251,191,36,.3); border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; text-align: left; }
-    .ios-guide strong { color: var(--warn); font-size: .8rem; display: block; margin-bottom: .5rem; }
-    .ios-guide ol { color: var(--muted); font-size: .78rem; padding-left: 1.2rem; line-height: 1.9; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{--teal:#0d9488;--teal-lt:#14b8a6;--bg:#0a1628;--surface:#111f38;--border:#1e3a5f;--text:#e2e8f0;--muted:#64748b;--success:#34d399;--warn:#fbbf24;--danger:#f87171;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.25rem;background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(13,148,136,.18) 0%,transparent 70%);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2.5rem 2rem 2rem;max-width:360px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-lt),var(--teal));}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(13,148,136,.15);border:1px solid rgba(13,148,136,.3);color:var(--teal-lt);font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;padding:4px 12px;border-radius:100px;margin-bottom:1.5rem;}
+    .icon-wrap{width:72px;height:72px;background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.25);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.25rem;}
+    .spinner{display:none;width:48px;height:48px;border:3px solid var(--border);border-top-color:#d97706;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1.5rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    h1{color:var(--text);font-size:1.2rem;font-weight:600;margin-bottom:.5rem;}
+    .form-label{display:inline-block;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--teal-lt);letter-spacing:.06em;margin-bottom:1rem;}
+    p{color:var(--muted);font-size:.875rem;line-height:1.65;margin-bottom:1.75rem;}
+    .coords-box{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:12px;padding:.75rem 1rem;margin-bottom:1.25rem;font-family:'DM Mono',monospace;font-size:.78rem;color:var(--success);}
+    .btn{width:100%;padding:1rem 1.5rem;background:linear-gradient(135deg,var(--teal),#0891b2);color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .12s;box-shadow:0 4px 24px rgba(13,148,136,.35);-webkit-tap-highlight-color:transparent;}
+    .btn:active{opacity:.85;transform:scale(.98);}
+    .btn:disabled{background:#1e3a5f;box-shadow:none;color:var(--muted);cursor:not-allowed;}
+    .btn-skip{display:none;width:100%;padding:.75rem;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:.85rem;cursor:pointer;margin-top:.75rem;-webkit-tap-highlight-color:transparent;}
+    .status{font-size:.78rem;color:var(--muted);margin-top:.9rem;min-height:1.1rem;}
+    .status.ok{color:var(--success);} .status.err{color:var(--danger);}
+    .ios-guide{display:none;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:1rem;margin-bottom:1.25rem;text-align:left;}
+    .ios-guide strong{color:var(--warn);font-size:.8rem;display:block;margin-bottom:.5rem;}
+    .ios-guide ol{color:var(--muted);font-size:.78rem;padding-left:1.2rem;line-height:1.9;}
   </style>
 </head>
 <body>
@@ -80,23 +46,73 @@
       <li>Vuelve aquí y toca <b>Reintentar</b></li>
     </ol>
   </div>
-  <p id="message">Toca el botón y <strong style="color:var(--text)">acepta el permiso</strong> de ubicación. Luego serás redirigido al formulario OMP automáticamente.</p>
+  <p id="message">Toca el botón y <strong style="color:var(--text)">acepta el permiso</strong> de ubicación. Luego serás redirigido al formulario automáticamente.</p>
   <div class="coords-box" id="coordsBox">📍 <span id="coordsText"></span></div>
   <button class="btn" id="mainBtn" onclick="pedirUbicacion()">📍 Compartir ubicación</button>
   <button class="btn-skip" id="skipBtn" onclick="redirigir(null,null)">Continuar sin ubicación →</button>
   <div class="status" id="status"></div>
 </div>
 <script>
-  var FORM_URL = "https://forms.cloud.microsoft/r/Gt4FbdkQ7p";
+  var FORM_URL   = "https://forms.cloud.microsoft/r/Gt4FbdkQ7p";
+  var GPS_URL    = "https://script.google.com/macros/s/AKfycbwxb_9KcSb52THvOS4pCO4yrhMRqSgmf2eGE96SO2OuD1nIRWlLfM1CO0xBaX-67vq8/exec";
+  var FORM_NAME  = "OMP";
+
   var intentos=0,MAX=3,watchId=null,yaResuelto=false,timerIOS=null;
   var esIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-  function ui(estado,texto){var iw=document.getElementById('iconWrap'),sp=document.getElementById('spinner'),tit=document.getElementById('title'),msg=document.getElementById('message'),btn=document.getElementById('mainBtn'),skip=document.getElementById('skipBtn'),st=document.getElementById('status'),ios=document.getElementById('iosGuide'),cb=document.getElementById('coordsBox');ios.style.display='none';skip.style.display='none';cb.style.display='none';st.className='status';if(estado==='buscando'){iw.style.display='none';sp.style.display='block';tit.textContent='Obteniendo ubicación…';msg.textContent=esIOS?'Toca "Permitir" cuando Safari pregunte.':'Mantén la pantalla abierta.';btn.disabled=true;btn.textContent='⏳ Buscando…';st.textContent=texto||'';}if(estado==='error'){iw.style.display='flex';iw.textContent='⚠️';sp.style.display='none';tit.textContent='No se pudo obtener la ubicación';msg.innerHTML=texto||'Ocurrió un error.';btn.disabled=false;btn.textContent='🔄 Reintentar';skip.style.display='block';st.className='status err';st.textContent='Intento '+intentos+'/'+MAX;if(esIOS)ios.style.display='block';}if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación obtenida!';msg.textContent='Redirigiendo al formulario OMP…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}}
+  var sessionID = 'S-' + Date.now().toString(36).toUpperCase();
+
+  function ui(estado,texto){
+    var iw=document.getElementById('iconWrap'),sp=document.getElementById('spinner'),
+        tit=document.getElementById('title'),msg=document.getElementById('message'),
+        btn=document.getElementById('mainBtn'),skip=document.getElementById('skipBtn'),
+        st=document.getElementById('status'),ios=document.getElementById('iosGuide'),
+        cb=document.getElementById('coordsBox');
+    ios.style.display='none';skip.style.display='none';cb.style.display='none';st.className='status';
+    if(estado==='buscando'){iw.style.display='none';sp.style.display='block';tit.textContent='Obteniendo ubicación…';msg.textContent=esIOS?'Toca "Permitir" cuando Safari pregunte.':'Mantén la pantalla abierta.';btn.disabled=true;btn.textContent='⏳ Buscando…';st.textContent=texto||'';}
+    if(estado==='guardando'){iw.style.display='none';sp.style.display='block';tit.textContent='Guardando ubicación…';msg.textContent='Un momento, registrando tu ubicación.';btn.disabled=true;btn.textContent='⏳ Guardando…';}
+    if(estado==='error'){iw.style.display='flex';iw.textContent='⚠️';sp.style.display='none';tit.textContent='No se pudo obtener la ubicación';msg.innerHTML=texto||'Ocurrió un error.';btn.disabled=false;btn.textContent='🔄 Reintentar';skip.style.display='block';st.className='status err';st.textContent='Intento '+intentos+'/'+MAX;if(esIOS)ios.style.display='block';}
+    if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación guardada!';msg.textContent='Redirigiendo al formulario OMP…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}
+  }
+
   function limpiar(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}if(timerIOS!==null){clearTimeout(timerIOS);timerIOS=null;}}
+
+  function guardarGPS(lat,lng,acc){
+    ui('guardando');
+    var url=GPS_URL+'?form='+FORM_NAME+'&lat='+lat.toFixed(6)+'&lng='+lng.toFixed(6)+'&acc='+acc+'&sid='+sessionID;
+    var img=new Image();
+    img.onload=img.onerror=function(){
+      ui('ok','Precisión: ±'+acc+' m · ID: '+sessionID);
+      document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
+      setTimeout(function(){window.location.href=FORM_URL;},1800);
+    };
+    img.src=url;
+  }
+
   function redirigir(lat,lng){limpiar();window.location.href=FORM_URL;}
-  function onExito(pos){if(yaResuelto)return;yaResuelto=true;limpiar();var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);sessionStorage.setItem('gps_lat',lat.toFixed(6));sessionStorage.setItem('gps_lng',lng.toFixed(6));ui('ok','Precisión: ±'+acc+' m');setTimeout(function(){redirigir(lat,lng);},1800);}
-  function onError(err){if(yaResuelto)return;yaResuelto=true;limpiar();var msgs={1:'🔒 Permiso denegado.<br><small>Revisa los ajustes de tu navegador.</small>',2:'📡 Sin señal GPS.<br><small>Activa el GPS e inténtalo de nuevo.</small>',3:'⏱ Tiempo agotado.<br><small>Sal a un lugar abierto.</small>'};if(err&&err.code===1){ui('error',msgs[1]);setTimeout(function(){redirigir(null,null);},5000);return;}if(intentos<MAX){ui('buscando','Reintentando ('+intentos+'/'+MAX+')…');setTimeout(solicitarGPS,1800);}else{ui('error',msgs[err?err.code:2]||'Error desconocido.');}}
-  function solicitarGPS(){intentos++;yaResuelto=false;if(esIOS){timerIOS=setTimeout(function(){onError({code:3});},20000);watchId=navigator.geolocation.watchPosition(onExito,onError,{enableHighAccuracy:true,timeout:20000,maximumAge:0});}else{navigator.geolocation.getCurrentPosition(onExito,onError,{enableHighAccuracy:true,timeout:15000,maximumAge:30000});}}
-  function pedirUbicacion(){if(!navigator.geolocation){redirigir(null,null);return;}intentos=0;yaResuelto=false;ui('buscando');solicitarGPS();}
+
+  function onExito(pos){
+    if(yaResuelto)return;yaResuelto=true;limpiar();
+    guardarGPS(pos.coords.latitude,pos.coords.longitude,Math.round(pos.coords.accuracy));
+  }
+
+  function onError(err){
+    if(yaResuelto)return;yaResuelto=true;limpiar();
+    var msgs={1:'🔒 Permiso denegado.<br><small>Revisa los ajustes de ubicación.</small>',2:'📡 Sin señal GPS.<br><small>Activa el GPS e inténtalo de nuevo.</small>',3:'⏱ Tiempo agotado.<br><small>Sal a un lugar abierto.</small>'};
+    if(err&&err.code===1){ui('error',msgs[1]);setTimeout(function(){redirigir(null,null);},5000);return;}
+    if(intentos<MAX){ui('buscando','Reintentando ('+intentos+'/'+MAX+')…');setTimeout(solicitarGPS,1800);}
+    else{ui('error',msgs[err?err.code:2]||'Error desconocido.');}
+  }
+
+  function solicitarGPS(){
+    intentos++;yaResuelto=false;
+    if(esIOS){timerIOS=setTimeout(function(){onError({code:3});},20000);watchId=navigator.geolocation.watchPosition(onExito,onError,{enableHighAccuracy:true,timeout:20000,maximumAge:0});}
+    else{navigator.geolocation.getCurrentPosition(onExito,onError,{enableHighAccuracy:true,timeout:15000,maximumAge:30000});}
+  }
+
+  function pedirUbicacion(){
+    if(!navigator.geolocation){redirigir(null,null);return;}
+    intentos=0;yaResuelto=false;ui('buscando');solicitarGPS();
+  }
 </script>
 </body>
 </html>
