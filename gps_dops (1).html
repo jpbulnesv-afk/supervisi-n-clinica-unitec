@@ -24,7 +24,7 @@
     .btn:disabled{background:#1e3a5f;box-shadow:none;color:var(--muted);cursor:not-allowed;}
     .btn-skip{display:none;width:100%;padding:.75rem;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:.85rem;cursor:pointer;margin-top:.75rem;-webkit-tap-highlight-color:transparent;}
     .status{font-size:.78rem;color:var(--muted);margin-top:.9rem;min-height:1.1rem;}
-    .status.ok{color:var(--success);} .status.err{color:var(--danger);}
+    .status.ok{color:var(--success);}.status.err{color:var(--danger);}
     .ios-guide{display:none;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:1rem;margin-bottom:1.25rem;text-align:left;}
     .ios-guide strong{color:var(--warn);font-size:.8rem;display:block;margin-bottom:.5rem;}
     .ios-guide ol{color:var(--muted);font-size:.78rem;padding-left:1.2rem;line-height:1.9;}
@@ -49,15 +49,19 @@
   <p id="message">Toca el botón y <strong style="color:var(--text)">acepta el permiso</strong> de ubicación. Serás redirigido al formulario automáticamente.</p>
   <div class="coords-box" id="coordsBox">📍 <span id="coordsText"></span></div>
   <button class="btn" id="mainBtn" onclick="pedirUbicacion()">📍 Compartir ubicación</button>
-  <button class="btn-skip" id="skipBtn" onclick="redirigir(null,null)">Continuar sin ubicación →</button>
+  <button class="btn-skip" id="skipBtn" onclick="irAFormulario('')">Continuar sin ubicación →</button>
   <div class="status" id="status"></div>
 </div>
 <script>
   // ══════════════════════════════════════════════
-  // CONFIGURACIÓN — igual que tu código original
+  // CONFIGURACIÓN
   // ══════════════════════════════════════════════
-  var FORM_URL = "https://forms.cloud.microsoft/r/MQAFtGb9TQ";
-  var GPS_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1zEoRm4ryh849OKRai1iYWQFmIgVD4PJPuy1a0-Crur9fzA/viewform?usp=pp_url&entry.558213725=";
+  // Formulario de evaluación (Microsoft Forms)
+  var EVAL_URL = "https://forms.cloud.microsoft/r/MQAFtGb9TQ";
+
+  // Formulario GPS (Google Forms — igual que tu código original)
+  // Al enviarse, Google Forms redirige a EVAL_URL automáticamente
+  var GPS_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSd7pwLciOesl4wuwDlQiaHyrpb-yuiFyNsCNHLGo-mRsR1BMw/viewform?usp=pp_url&entry.1521283488=";
   // ══════════════════════════════════════════════
 
   var intentos=0,MAX=3,watchId=null,yaResuelto=false,timerIOS=null;
@@ -72,38 +76,41 @@
     ios.style.display='none';skip.style.display='none';cb.style.display='none';st.className='status';
     if(estado==='buscando'){iw.style.display='none';sp.style.display='block';tit.textContent='Obteniendo ubicación…';msg.textContent=esIOS?'Toca "Permitir" cuando Safari pregunte.':'Mantén la pantalla abierta.';btn.disabled=true;btn.textContent='⏳ Buscando…';st.textContent=texto||'';}
     if(estado==='error'){iw.style.display='flex';iw.textContent='⚠️';sp.style.display='none';tit.textContent='No se pudo obtener la ubicación';msg.innerHTML=texto||'Ocurrió un error.';btn.disabled=false;btn.textContent='🔄 Reintentar';skip.style.display='block';st.className='status err';st.textContent='Intento '+intentos+'/'+MAX;if(esIOS)ios.style.display='block';}
-    if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación obtenida!';msg.textContent='Redirigiendo al formulario DOPS…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}
+    if(estado==='ok'){iw.style.display='flex';iw.textContent='✅';sp.style.display='none';tit.textContent='¡Ubicación obtenida!';msg.textContent='Redirigiendo…';btn.disabled=true;btn.textContent='✅ Listo';cb.style.display='block';st.className='status ok';st.textContent=texto||'';}
   }
 
-  function limpiar(){if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}if(timerIOS!==null){clearTimeout(timerIOS);timerIOS=null;}}
+  function limpiar(){
+    if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null;}
+    if(timerIOS!==null){clearTimeout(timerIOS);timerIOS=null;}
+  }
 
-  function redirigir(lat,lng){
+  // Igual que tu código original — redirige al GPS form con coords en URL
+  // Google Forms guarda las coords y luego el docente toca "Siguiente" para ir a la evaluación
+  function irAFormulario(coords){
     limpiar();
-    // Igual que tu código original — coordenadas en la URL
-    var coords = (lat!=null&&lng!=null) ? lat.toFixed(6)+","+lng.toFixed(6) : "";
-    // Primero guarda GPS en Google Forms, luego abre Microsoft Forms
     if(coords){
-      // Guardar GPS en background y redirigir a Microsoft Forms
-      var img = new Image();
-      img.src = GPS_FORM_URL + encodeURIComponent(coords);
-      setTimeout(function(){ window.location.href = FORM_URL; }, 500);
+      // Guarda GPS y va al formulario de evaluación
+      // Usamos sessionStorage para que al volver del GPS form se abra la evaluación
+      sessionStorage.setItem('eval_url', EVAL_URL);
+      window.location.href = GPS_FORM + encodeURIComponent(coords);
     } else {
-      window.location.href = FORM_URL;
+      window.location.href = EVAL_URL;
     }
   }
 
   function onExito(pos){
     if(yaResuelto)return;yaResuelto=true;limpiar();
     var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy);
+    var coords=lat.toFixed(6)+","+lng.toFixed(6);
     document.getElementById('coordsText').textContent=lat.toFixed(6)+', '+lng.toFixed(6);
     ui('ok','Precisión: ±'+acc+' m');
-    setTimeout(function(){redirigir(lat,lng);},1200);
+    setTimeout(function(){ irAFormulario(coords); },1200);
   }
 
   function onError(err){
     if(yaResuelto)return;yaResuelto=true;limpiar();
     var msgs={1:'🔒 Permiso denegado.<br><small>Revisa los ajustes de ubicación.</small>',2:'📡 Sin señal GPS.<br><small>Activa el GPS e inténtalo de nuevo.</small>',3:'⏱ Tiempo agotado.<br><small>Sal a un lugar abierto.</small>'};
-    if(err&&err.code===1){ui('error',msgs[1]);setTimeout(function(){redirigir(null,null);},5000);return;}
+    if(err&&err.code===1){ui('error',msgs[1]);setTimeout(function(){irAFormulario('');},5000);return;}
     if(intentos<MAX){ui('buscando','Reintentando ('+intentos+'/'+MAX+')…');setTimeout(solicitarGPS,1800);}
     else{ui('error',msgs[err?err.code:2]||'Error desconocido.');}
   }
@@ -115,7 +122,7 @@
   }
 
   function pedirUbicacion(){
-    if(!navigator.geolocation){redirigir(null,null);return;}
+    if(!navigator.geolocation){irAFormulario('');return;}
     intentos=0;yaResuelto=false;ui('buscando');solicitarGPS();
   }
 </script>
