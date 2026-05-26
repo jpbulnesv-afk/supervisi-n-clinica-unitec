@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Supervisión Clínica · Pediatría UNITEC</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a1628;--surface:#111f38;--surface2:#162340;--border:#1e3a5f;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+  --teal:#0d9488;--teal-lt:#14b8a6;
+  --purple:#7c3aed;--purple-lt:#8b5cf6;
+  --amber:#d97706;--amber-lt:#f59e0b;
+  --success:#34d399;--danger:#f87171;--warn:#fbbf24;--blue:#3b82f6;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(13,148,136,.18) 0%,transparent 70%);}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;overflow:hidden;}
+.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-lt),var(--purple-lt),var(--amber-lt));}
+.login-logo{font-size:2.5rem;margin-bottom:1rem;}
+.login-title{font-size:1.3rem;font-weight:700;margin-bottom:.4rem;}
+.login-sub{font-size:.85rem;color:var(--muted2);margin-bottom:2rem;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1.5rem;}
+.role-btn{padding:.9rem .5rem;border-radius:14px;border:1.5px solid var(--border);background:transparent;color:var(--muted2);cursor:pointer;font-size:.78rem;font-weight:500;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:.4rem;-webkit-tap-highlight-color:transparent;}
+.role-btn .role-icon{font-size:1.5rem;}
+.role-btn.sel-coord{border-color:var(--teal);background:rgba(13,148,136,.12);color:var(--teal-lt);}
+.role-btn.sel-doc{border-color:var(--purple);background:rgba(124,58,237,.12);color:var(--purple-lt);}
+.role-btn.sel-est{border-color:var(--amber);background:rgba(217,119,6,.12);color:var(--amber-lt);}
+.pin-input{width:100%;padding:.9rem 1rem;border-radius:12px;border:1.5px solid var(--border);background:rgba(0,0,0,.3);color:var(--text);font-size:1.2rem;font-family:'DM Mono',monospace;letter-spacing:.3em;text-align:center;margin-bottom:1rem;transition:border-color .2s;}
+.pin-input:focus{outline:none;border-color:var(--teal);}
+.login-btn{width:100%;padding:1rem;border-radius:14px;border:none;background:linear-gradient(135deg,var(--teal),#0891b2);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;box-shadow:0 4px 24px rgba(13,148,136,.35);transition:opacity .2s,transform .12s;-webkit-tap-highlight-color:transparent;}
+.login-btn:active{opacity:.85;transform:scale(.98);}
+.login-error{color:var(--danger);font-size:.82rem;margin-top:.75rem;min-height:1.1rem;}
+.pin-hint{font-size:.75rem;color:var(--muted);margin-bottom:.75rem;}
+
+/* APP */
+#appScreen{display:none;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:.75rem;}
+.topbar-badge{padding:3px 10px;border-radius:100px;font-size:.7rem;font-weight:600;font-family:'DM Mono',monospace;}
+.badge-coord{background:rgba(13,148,136,.2);color:var(--teal-lt);}
+.badge-doc{background:rgba(124,58,237,.2);color:var(--purple-lt);}
+.badge-est{background:rgba(217,119,6,.2);color:var(--amber-lt);}
+.topbar-title{font-size:.95rem;font-weight:600;}
+.refresh-btn,.logout-btn{padding:.45rem .9rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-size:.78rem;cursor:pointer;transition:all .2s;}
+.refresh-btn:hover{border-color:var(--teal);color:var(--teal-lt);}
+
+.main{padding:1.25rem;max-width:1100px;margin:0 auto;}
+
+/* TABS */
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;overflow-x:auto;padding-bottom:.25rem;}
+.tab{padding:.55rem 1.1rem;border-radius:100px;border:1.5px solid var(--border);background:transparent;color:var(--muted2);font-size:.82rem;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .18s;-webkit-tap-highlight-color:transparent;}
+.tab.act-teal{background:rgba(13,148,136,.15);border-color:var(--teal);color:var(--teal-lt);}
+.tab.act-purple{background:rgba(124,58,237,.15);border-color:var(--purple);color:var(--purple-lt);}
+.tab.act-amber{background:rgba(217,119,6,.15);border-color:var(--amber);color:var(--amber-lt);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.teal::before{background:linear-gradient(90deg,var(--teal),var(--teal-lt));}
+.stat-card.purple::before{background:linear-gradient(90deg,var(--purple),var(--purple-lt));}
+.stat-card.amber::before{background:linear-gradient(90deg,var(--amber),var(--amber-lt));}
+.stat-card.blue::before{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.stat-label{font-size:.72rem;color:var(--muted2);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;}
+.stat-value{font-size:2rem;font-weight:700;line-height:1;}
+.stat-value.teal{color:var(--teal-lt);}
+.stat-value.purple{color:var(--purple-lt);}
+.stat-value.amber{color:var(--amber-lt);}
+.stat-value.blue{color:#60a5fa;}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;}
+.section-title{font-size:.9rem;font-weight:600;margin-bottom:1rem;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+th{color:var(--muted2);font-weight:500;text-align:left;padding:.6rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;}
+td{padding:.65rem .75rem;border-bottom:1px solid rgba(30,58,95,.5);color:var(--muted2);}
+td:first-child{color:var(--text);font-weight:500;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+/* BAR CHART */
+.bar-chart{display:flex;flex-direction:column;gap:.75rem;}
+.bar-row{display:flex;align-items:center;gap:.75rem;}
+.bar-name{font-size:.78rem;color:var(--muted2);min-width:130px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:rgba(255,255,255,.05);border-radius:100px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:100px;transition:width .6s ease;}
+.bar-fill.teal{background:linear-gradient(90deg,var(--teal),var(--teal-lt));}
+.bar-fill.purple{background:linear-gradient(90deg,var(--purple),var(--purple-lt));}
+.bar-fill.amber{background:linear-gradient(90deg,var(--amber),var(--amber-lt));}
+.bar-fill.danger{background:linear-gradient(90deg,#dc2626,var(--danger));}
+.bar-count{font-size:.75rem;color:var(--muted2);min-width:24px;text-align:right;font-family:'DM Mono',monospace;}
+
+/* BRECHA CHART */
+.brecha-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;}
+.brecha-label{font-size:.75rem;color:var(--muted2);min-width:140px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.brecha-track{flex:1;background:rgba(255,255,255,.05);border-radius:100px;height:10px;overflow:hidden;position:relative;}
+.brecha-meta{position:absolute;top:0;height:100%;background:rgba(13,148,136,.15);border-right:2px dashed var(--teal);transition:width .6s;}
+.brecha-actual{position:absolute;top:0;height:100%;border-radius:100px;transition:width .6s;}
+.brecha-score{font-size:.72rem;font-family:'DM Mono',monospace;min-width:32px;text-align:right;}
+
+/* PILL */
+.pill{display:inline-block;padding:2px 8px;border-radius:100px;font-size:.7rem;font-weight:500;}
+.pill-teal{background:rgba(13,148,136,.2);color:var(--teal-lt);}
+.pill-purple{background:rgba(124,58,237,.2);color:var(--purple-lt);}
+.pill-amber{background:rgba(217,119,6,.2);color:var(--amber-lt);}
+.pill-success{background:rgba(52,211,153,.15);color:var(--success);}
+.pill-warn{background:rgba(251,191,36,.15);color:var(--warn);}
+.pill-danger{background:rgba(248,113,113,.15);color:var(--danger);}
+
+/* FILTER */
+.filter-row{display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.filter-select{padding:.55rem .9rem;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-size:.82rem;cursor:pointer;-webkit-appearance:none;flex:1;min-width:140px;}
+
+/* EMPTY / LOADING */
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.loading{text-align:center;padding:3rem;}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 1rem;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:480px){
+  .cards-grid{grid-template-columns:1fr 1fr;}
+  .bar-name,.brecha-label{min-width:90px;max-width:90px;}
+  .main{padding:1rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+<div class="login-card">
+  <div class="login-logo">🏥</div>
+  <h1 class="login-title">Supervisión Clínica</h1>
+  <p class="login-sub">Pediatría · FCS / UNITEC</p>
+  <div class="role-grid">
+    <button class="role-btn" onclick="selectRole('coordinador')" id="btn-coordinador"><span class="role-icon">👨‍💼</span><span>Coordinador</span></button>
+    <button class="role-btn" onclick="selectRole('docente')" id="btn-docente"><span class="role-icon">👨‍⚕️</span><span>Docente</span></button>
+    <button class="role-btn" onclick="selectRole('estudiante')" id="btn-estudiante"><span class="role-icon">🎓</span><span>Estudiante</span></button>
+  </div>
+  <p class="pin-hint" id="pinHint">Selecciona tu rol para continuar</p>
+  <input class="pin-input" type="password" id="pinInput" placeholder="PIN" maxlength="6" style="display:none" oninput="clearErr()" onkeydown="if(event.key==='Enter')doLogin()"/>
+  <button class="login-btn" onclick="doLogin()" id="loginBtn" style="display:none">Entrar →</button>
+  <div class="login-error" id="loginError"></div>
+</div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span>🏥</span>
+      <span class="topbar-title">Pediatría UNITEC</span>
+      <span class="topbar-badge" id="topbarBadge"></span>
+    </div>
+    <div style="display:flex;gap:.5rem;">
+      <button class="refresh-btn" onclick="loadData()">↻</button>
+      <button class="logout-btn" onclick="logout()">Salir</button>
+    </div>
+  </div>
+  <div class="main">
+    <div id="loadingState" class="loading"><div class="loading-spinner"></div><p>Cargando datos...</p></div>
+    <div id="appContent" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════════
+var SHEET_ID = '1TMqmY3XHIn9BJSC8jRuSI4DMHSg-s3VEXR0OlZO_AaQ';
+var SHEETS = { minicex: 'Respuestas de formulario 2', dops: 'Respuestas de formulario 3', omp: 'Respuestas de formulario 4' };
+var PINS = { coordinador: '1234', docente: '5678', estudiante: '9012' };
+var META_MAX = 9; // Puntaje máximo posible en escala
+
+// Dominios Mini-CEX para gráficos de brecha
+var DOMINIOS_CEX = ['Habilidades de entrevista / anamnesis','Habilidades de examen físico','Juicio clínico','Habilidades de comunicación con el paciente y familia','Profesionalismo / ética','Organización y eficiencia','Competencia clínica global'];
+var DOMINIOS_DOPS = ['Conocimiento de indicaciones y anatomía relevante','Consentimiento informado','Preparación previa al procedimiento','Analgesia / sedación segura','Habilidad técnica','Técnica de asepsia','Solicita apoyo cuando es apropiado','Plan de manejo post-procedimiento','Comunicación estudiante - paciente','Consideración del paciente / ética profesional','Competencia clínica global'];
+// ══════════════════════════════════════════════
+
+var currentRole = null;
+var allData = { minicex: [], dops: [], omp: [] };
+
+// ── LOGIN ──
+function selectRole(r) {
+  currentRole = r;
+  ['coordinador','docente','estudiante'].forEach(function(x){ document.getElementById('btn-'+x).className='role-btn'; });
+  var cls = r==='coordinador'?'sel-coord':r==='docente'?'sel-doc':'sel-est';
+  document.getElementById('btn-'+r).className='role-btn '+cls;
+  document.getElementById('pinInput').style.display='block';
+  document.getElementById('loginBtn').style.display='block';
+  document.getElementById('pinHint').textContent='Ingresa tu PIN de acceso';
+  document.getElementById('pinInput').focus();
+}
+function clearErr(){ document.getElementById('loginError').textContent=''; }
+function doLogin(){
+  if(!currentRole){ document.getElementById('loginError').textContent='Selecciona un rol primero.'; return; }
+  var pin=document.getElementById('pinInput').value.trim();
+  if(pin!==PINS[currentRole]){ document.getElementById('loginError').textContent='PIN incorrecto.'; return; }
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  var badges={coordinador:['Coordinador','badge-coord'],docente:['Docente','badge-doc'],estudiante:['Estudiante','badge-est']};
+  document.getElementById('topbarBadge').textContent=badges[currentRole][0];
+  document.getElementById('topbarBadge').className='topbar-badge '+badges[currentRole][1];
+  loadData();
+}
+function logout(){
+  currentRole=null;
+  document.getElementById('pinInput').value='';
+  document.getElementById('loginError').textContent='';
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  ['coordinador','docente','estudiante'].forEach(function(r){ document.getElementById('btn-'+r).className='role-btn'; });
+  document.getElementById('pinInput').style.display='none';
+  document.getElementById('loginBtn').style.display='none';
+  document.getElementById('pinHint').textContent='Selecciona tu rol para continuar';
+}
+
+// ── DATA FETCH ──
+function fetchSheet(name, cb){
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name);
+  var cbName='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+  url+='&callback='+cbName;
+  window[cbName]=function(data){
+    try{ document.head.removeChild(script); }catch(e){}
+    delete window[cbName];
+    var rows=[];
+    if(data&&data.table&&data.table.rows){
+      var cols=data.table.cols.map(function(c){ return c.label||''; });
+      data.table.rows.forEach(function(r){
+        if(!r.c)return;
+        var obj={};
+        cols.forEach(function(col,i){ obj[col]=r.c&&r.c[i]?(r.c[i].v!=null?String(r.c[i].v):''):''; });
+        if(Object.values(obj).some(function(v){return v.trim();})) rows.push(obj);
+      });
+    }
+    cb(rows);
+  };
+  var script=document.createElement('script');
+  script.src=url;
+  script.onerror=function(){ delete window[cbName]; cb([]); };
+  document.head.appendChild(script);
+}
+
+function loadData(){
+  document.getElementById('loadingState').style.display='block';
+  document.getElementById('appContent').style.display='none';
+  var done=0;
+  function check(){ done++; if(done===3) renderApp(); }
+  fetchSheet(SHEETS.minicex,function(d){ allData.minicex=d; check(); });
+  fetchSheet(SHEETS.dops,   function(d){ allData.dops=d;    check(); });
+  fetchSheet(SHEETS.omp,    function(d){ allData.omp=d;     check(); });
+}
+
+// ── HELPERS ──
+function countBy(arr,f){ var c={}; arr.forEach(function(r){ var k=r[f]||'Sin datos'; c[k]=(c[k]||0)+1; }); return c; }
+function uniqueVals(arr,f){ var s={}; arr.forEach(function(r){ if(r[f])s[r[f]]=1; }); return Object.keys(s).sort(); }
+
+function scoreVal(v){
+  if(!v)return null;
+  var m=v.match(/^(\d)/);
+  return m?parseInt(m[1]):null;
+}
+
+function avgScoreByDomain(rows, domainCols){
+  var result={};
+  domainCols.forEach(function(col){
+    var vals=rows.map(function(r){ return scoreVal(r[col]||r['Evaluación por dominios.'+col]||''); }).filter(function(x){return x!==null;});
+    result[col]=vals.length?Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length*10)/10:null;
+  });
+  return result;
+}
+
+function pillRec(v){
+  if(!v)return '';
+  if(v.includes('independiente'))return '<span class="pill pill-success">Independiente</span>';
+  if(v.includes('supervisada')&&!v.includes('estricta'))return '<span class="pill pill-teal">Supervisada</span>';
+  if(v.includes('estricta'))return '<span class="pill pill-warn">Supervisión estricta</span>';
+  if(v.includes('asistida'))return '<span class="pill pill-danger">Asistida</span>';
+  return '<span class="pill pill-teal">'+v.substring(0,20)+'</span>';
+}
+
+function barChart(counts, color){
+  var entries=Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+  if(!entries.length)return '<div class="empty">Sin datos aún</div>';
+  var max=Math.max.apply(null,entries.map(function(e){return e[1];}));
+  return '<div class="bar-chart">'+entries.map(function(e){
+    var pct=Math.round(e[1]/max*100);
+    return '<div class="bar-row"><span class="bar-name" title="'+e[0]+'">'+e[0]+'</span><div class="bar-track"><div class="bar-fill '+color+'" style="width:'+pct+'%"></div></div><span class="bar-count">'+e[1]+'</span></div>';
+  }).join('')+'</div>';
+}
+
+function brechaChart(domainAvgs, color){
+  var entries=Object.entries(domainAvgs).filter(function(e){return e[1]!==null;});
+  if(!entries.length)return '<div class="empty">Sin evaluaciones suficientes</div>';
+  var meta=7; // Meta mínima = satisfactorio
+  return '<div class="bar-chart">'+entries.map(function(e){
+    var score=e[1];
+    var pctScore=Math.round(score/META_MAX*100);
+    var pctMeta=Math.round(meta/META_MAX*100);
+    var colorActual=score>=meta?color:'danger';
+    var scoreColor=score>=meta?'var(--success)':'var(--danger)';
+    return '<div class="brecha-row">'+
+      '<span class="brecha-label" title="'+e[0]+'">'+e[0].replace('Habilidades de ','').replace('Competencia ','Comp. ')+'</span>'+
+      '<div class="brecha-track">'+
+        '<div class="brecha-meta" style="width:'+pctMeta+'%"></div>'+
+        '<div class="brecha-actual bar-fill '+colorActual+'" style="width:'+pctScore+'%"></div>'+
+      '</div>'+
+      '<span class="brecha-score" style="color:'+scoreColor+'">'+score+'</span>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+
+function tableHTML(headers,rows){
+  if(!rows.length)return '<div class="empty">Sin evaluaciones registradas aún.</div>';
+  return '<div class="table-wrap"><table><thead><tr>'+headers.map(function(h){return '<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>'+
+    rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td>'+(i===0?c:'<span style="color:var(--muted2)">'+c+'</span>')+'</td>';}).join('')+'</tr>';}).join('')+
+  '</tbody></table></div>';
+}
+
+// ── RENDER ──
+function renderApp(){
+  document.getElementById('loadingState').style.display='none';
+  document.getElementById('appContent').style.display='block';
+  var html='';
+  if(currentRole==='coordinador') html=renderCoordinador();
+  else if(currentRole==='docente') html=renderDocente();
+  else html=renderEstudiante();
+  document.getElementById('appContent').innerHTML=html;
+}
+
+function switchTab(id,btn,color){
+  var container=btn.closest('.main')||document.getElementById('appContent');
+  container.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  container.querySelectorAll('.tab').forEach(function(t){t.className='tab';});
+  var panel=document.getElementById('tab-'+id);
+  if(panel)panel.classList.add('active');
+  btn.className='tab act-'+color;
+}
+
+// ── COORDINADOR ──
+function renderCoordinador(){
+  var total=allData.minicex.length+allData.dops.length+allData.omp.length;
+  var allRows=[].concat(allData.minicex,allData.dops,allData.omp);
+  var estCEX=countBy(allData.minicex,'Nombre completo del estudiante');
+  var avgsCEX=avgScoreByDomain(allData.minicex,DOMINIOS_CEX);
+
+  var tabs='<div class="tab-bar">'+
+    '<button class="tab act-teal" onclick="switchTab(\'c-resumen\',this,\'teal\')">Resumen</button>'+
+    '<button class="tab" onclick="switchTab(\'c-brechas\',this,\'teal\')">Brechas Mini-CEX</button>'+
+    '<button class="tab" onclick="switchTab(\'c-minicex\',this,\'teal\')">Mini-CEX</button>'+
+    '<button class="tab" onclick="switchTab(\'c-dops\',this,\'purple\')">DOPS</button>'+
+    '<button class="tab" onclick="switchTab(\'c-omp\',this,\'amber\')">OMP</button>'+
+    '</div>';
+
+  var resumen='<div class="cards-grid">'+
+    '<div class="stat-card teal"><div class="stat-label">Total evaluaciones</div><div class="stat-value teal">'+total+'</div></div>'+
+    '<div class="stat-card teal"><div class="stat-label">Mini-CEX</div><div class="stat-value teal">'+allData.minicex.length+'</div></div>'+
+    '<div class="stat-card purple"><div class="stat-label">DOPS</div><div class="stat-value purple">'+allData.dops.length+'</div></div>'+
+    '<div class="stat-card amber"><div class="stat-label">OMP</div><div class="stat-value amber">'+allData.omp.length+'</div></div>'+
+    '</div>'+
+    '<div class="section"><div class="section-title">Mini-CEX por estudiante</div>'+barChart(estCEX,'teal')+'</div>'+
+    '<div class="section"><div class="section-title">DOPS por estudiante</div>'+barChart(countBy(allData.dops,'Nombre completo del estudiante'),'purple')+'</div>'+
+    '<div class="section"><div class="section-title">OMP por estudiante</div>'+barChart(countBy(allData.omp,'Nombre completo del estudiante'),'amber')+'</div>';
+
+  var brechas='<div class="section">'+
+    '<div class="section-title">Brechas Mini-CEX — promedio grupal vs meta (7 = satisfactorio)</div>'+
+    '<div style="display:flex;gap:1rem;margin-bottom:1rem;font-size:.72rem;color:var(--muted2)">'+
+    '<span style="display:flex;align-items:center;gap:.4rem"><span style="width:12px;height:2px;background:var(--teal);display:inline-block;border-top:2px dashed var(--teal)"></span>Meta mínima</span>'+
+    '<span style="display:flex;align-items:center;gap:.4rem"><span style="width:12px;height:8px;background:var(--teal);border-radius:4px;display:inline-block"></span>Logrado</span>'+
+    '<span style="display:flex;align-items:center;gap:.4rem"><span style="width:12px;height:8px;background:var(--danger);border-radius:4px;display:inline-block"></span>Bajo meta</span>'+
+    '</div>'+
+    brechaChart(avgsCEX,'teal')+'</div>';
+
+  var cexRows=allData.minicex.map(function(r){return [r['Nombre completo del estudiante']||'',r['Nombre del docente evaluador']||'',r['Semana de la rotación']||r['Semana de la rotacion']||'',r['Subrotación actual']||r['Subrotacion actual']||'',r['Hospital / Sede clínica']||'',pillRec(r['Recomendación de seguimiento']||r['Recomendacion de seguimiento']||'')];});
+  var dopsRows=allData.dops.map(function(r){return [r['Nombre completo del estudiante']||'',r['Nombre del docente evaluador']||'',r['Procedimiento evaluado']||'',r['Disciplina']||'',r['Dificultad del procedimiento']||'',pillRec(r['Recomendación para procedimientos futuros']||'')];});
+  var ompRows=allData.omp.map(function(r){return [r['Nombre completo del estudiante']||'',r['Nombre del docente']||'',r['Semana de la rotación']||'',r['Contexto de la sesión']||''];});
+
+  return tabs+
+    '<div class="tab-panel active" id="tab-c-resumen">'+resumen+'</div>'+
+    '<div class="tab-panel" id="tab-c-brechas">'+brechas+'</div>'+
+    '<div class="tab-panel" id="tab-c-minicex"><div class="section"><div class="section-title">Todas las evaluaciones Mini-CEX</div>'+tableHTML(['Estudiante','Docente','Semana','Subrotación','Hospital','Recomendación'],cexRows)+'</div></div>'+
+    '<div class="tab-panel" id="tab-c-dops"><div class="section"><div class="section-title">Todas las evaluaciones DOPS</div>'+tableHTML(['Estudiante','Docente','Procedimiento','Disciplina','Dificultad','Recomendación'],dopsRows)+'</div></div>'+
+    '<div class="tab-panel" id="tab-c-omp"><div class="section"><div class="section-title">Todas las evaluaciones OMP</div>'+tableHTML(['Estudiante','Docente','Semana','Contexto'],ompRows)+'</div></div>';
+}
+
+// ── DOCENTE ──
+function renderDocente(){
+  var docentes=uniqueVals([].concat(
+    allData.minicex.map(function(r){return {Docente:r['Nombre del docente evaluador']};}),
+    allData.dops.map(function(r){return {Docente:r['Nombre del docente evaluador']};}),
+    allData.omp.map(function(r){return {Docente:r['Nombre del docente']};})
+  ),'Docente');
+
+  var tabs='<div class="tab-bar">'+
+    '<button class="tab act-purple" onclick="switchTab(\'d-resumen\',this,\'purple\')">Resumen</button>'+
+    '<button class="tab" onclick="switchTab(\'d-brechas\',this,\'purple\')">Brechas</button>'+
+    '<button class="tab" onclick="switchTab(\'d-detalle\',this,\'purple\')">Detalle</button>'+
+    '</div>';
+
+  var filter='<div class="filter-row"><select class="filter-select" id="filterDoc" onchange="renderDocView()">'+
+    '<option value="">— Selecciona tu nombre —</option>'+
+    docentes.map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join('')+
+    '</select></div>';
+
+  return filter+tabs+
+    '<div class="tab-panel active" id="tab-d-resumen"><div id="doc-resumen"><div class="empty">Selecciona tu nombre para ver tus evaluaciones.</div></div></div>'+
+    '<div class="tab-panel" id="tab-d-brechas"><div id="doc-brechas"><div class="empty">Selecciona tu nombre.</div></div></div>'+
+    '<div class="tab-panel" id="tab-d-detalle"><div id="doc-detalle"><div class="empty">Selecciona tu nombre.</div></div></div>';
+}
+
+function renderDocView(){
+  var nombre=document.getElementById('filterDoc').value;
+  if(!nombre)return;
+  var cex=allData.minicex.filter(function(r){return r['Nombre del docente evaluador']===nombre;});
+  var dops=allData.dops.filter(function(r){return r['Nombre del docente evaluador']===nombre;});
+  var omp=allData.omp.filter(function(r){return r['Nombre del docente']===nombre;});
+  var avgsCEX=avgScoreByDomain(cex,DOMINIOS_CEX);
+
+  document.getElementById('doc-resumen').innerHTML=
+    '<div class="cards-grid">'+
+    '<div class="stat-card purple"><div class="stat-label">Mini-CEX</div><div class="stat-value purple">'+cex.length+'</div></div>'+
+    '<div class="stat-card purple"><div class="stat-label">DOPS</div><div class="stat-value purple">'+dops.length+'</div></div>'+
+    '<div class="stat-card purple"><div class="stat-label">OMP</div><div class="stat-value purple">'+omp.length+'</div></div>'+
+    '</div>'+
+    '<div class="section"><div class="section-title">Estudiantes evaluados</div>'+barChart(countBy([].concat(cex,dops,omp),'Nombre completo del estudiante'),'purple')+'</div>';
+
+  document.getElementById('doc-brechas').innerHTML=
+    '<div class="section"><div class="section-title">Brechas Mini-CEX de tus estudiantes</div>'+brechaChart(avgsCEX,'purple')+'</div>';
+
+  var cexRows=cex.map(function(r){return [r['Nombre completo del estudiante']||'',r['Semana de la rotación']||'',r['Subrotación actual']||'',pillRec(r['Recomendación de seguimiento']||'')];});
+  document.getElementById('doc-detalle').innerHTML=
+    '<div class="section"><div class="section-title">Mis evaluaciones Mini-CEX</div>'+tableHTML(['Estudiante','Semana','Subrotación','Recomendación'],cexRows)+'</div>';
+}
+
+// ── ESTUDIANTE ──
+function renderEstudiante(){
+  var estudiantes=uniqueVals([].concat(allData.minicex,allData.dops,allData.omp),'Nombre completo del estudiante');
+
+  var tabs='<div class="tab-bar">'+
+    '<button class="tab act-amber" onclick="switchTab(\'e-resumen\',this,\'amber\')">Mi progreso</button>'+
+    '<button class="tab" onclick="switchTab(\'e-brechas\',this,\'amber\')">Mis brechas</button>'+
+    '<button class="tab" onclick="switchTab(\'e-detalle\',this,\'amber\')">Mis evaluaciones</button>'+
+    '</div>';
+
+  var filter='<div class="filter-row"><select class="filter-select" id="filterEst" onchange="renderEstView()">'+
+    '<option value="">— Selecciona tu nombre —</option>'+
+    estudiantes.map(function(d){return '<option value="'+d+'">'+d+'</option>';}).join('')+
+    '</select></div>';
+
+  return filter+tabs+
+    '<div class="tab-panel active" id="tab-e-resumen"><div id="est-resumen"><div class="empty">Selecciona tu nombre para ver tu progreso.</div></div></div>'+
+    '<div class="tab-panel" id="tab-e-brechas"><div id="est-brechas"><div class="empty">Selecciona tu nombre.</div></div></div>'+
+    '<div class="tab-panel" id="tab-e-detalle"><div id="est-detalle"><div class="empty">Selecciona tu nombre.</div></div></div>';
+}
+
+function renderEstView(){
+  var nombre=document.getElementById('filterEst').value;
+  if(!nombre)return;
+  var cex=allData.minicex.filter(function(r){return r['Nombre completo del estudiante']===nombre;});
+  var dops=allData.dops.filter(function(r){return r['Nombre completo del estudiante']===nombre;});
+  var omp=allData.omp.filter(function(r){return r['Nombre completo del estudiante']===nombre;});
+  var avgsCEX=avgScoreByDomain(cex,DOMINIOS_CEX);
+  var total=cex.length+dops.length+omp.length;
+
+  document.getElementById('est-resumen').innerHTML=
+    '<div class="cards-grid">'+
+    '<div class="stat-card amber"><div class="stat-label">Total</div><div class="stat-value amber">'+total+'</div></div>'+
+    '<div class="stat-card teal"><div class="stat-label">Mini-CEX</div><div class="stat-value teal">'+cex.length+'</div></div>'+
+    '<div class="stat-card purple"><div class="stat-label">DOPS</div><div class="stat-value purple">'+dops.length+'</div></div>'+
+    '<div class="stat-card amber"><div class="stat-label">OMP</div><div class="stat-value amber">'+omp.length+'</div></div>'+
+    '</div>'+
+    '<div class="section"><div class="section-title">Progreso por semana</div>'+barChart(countBy([].concat(cex,dops,omp),'Semana de la rotación'),'amber')+'</div>'+
+    '<div class="section"><div class="section-title">Por subrotación</div>'+barChart(countBy([].concat(cex,dops),'Subrotación actual'),'teal')+'</div>';
+
+  document.getElementById('est-brechas').innerHTML=
+    '<div class="section">'+
+    '<div class="section-title">Mis brechas Mini-CEX — aspectos por mejorar</div>'+
+    '<div style="font-size:.75rem;color:var(--muted2);margin-bottom:1rem">La línea punteada indica la meta mínima (7 = satisfactorio). Las barras rojas son áreas prioritarias de mejora.</div>'+
+    brechaChart(avgsCEX,'amber')+'</div>';
+
+  var cexRows=cex.map(function(r){return [r['Semana de la rotación']||'',r['Subrotación actual']||'',r['Nombre del docente evaluador']||'',r['Fortalezas observadas']||'—',pillRec(r['Recomendación de seguimiento']||'')];});
+  document.getElementById('est-detalle').innerHTML=
+    '<div class="section"><div class="section-title">Mis evaluaciones Mini-CEX</div>'+tableHTML(['Semana','Subrotación','Docente','Fortalezas','Recomendación'],cexRows)+'</div>';
+}
+</script>
+</body>
+</html>
