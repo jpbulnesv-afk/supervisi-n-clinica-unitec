@@ -227,27 +227,48 @@ function logout(){
 
 // ── DATA FETCH ──
 function fetchSheet(name, cb){
-  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name);
+  var url='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)+'&headers=1';
   var cbName='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
   url+='&callback='+cbName;
-  window[cbName]=function(data){
-    try{ document.head.removeChild(script); }catch(e){}
+  var timer=null;
+  var script=document.createElement('script');
+  
+  function cleanup(){
+    if(timer)clearTimeout(timer);
+    try{ if(script.parentNode)document.head.removeChild(script); }catch(e){}
     delete window[cbName];
+  }
+  
+  window[cbName]=function(data){
+    cleanup();
     var rows=[];
-    if(data&&data.table&&data.table.rows){
-      var cols=data.table.cols.map(function(c){ return c.label||''; });
-      data.table.rows.forEach(function(r){
-        if(!r.c)return;
-        var obj={};
-        cols.forEach(function(col,i){ obj[col]=r.c&&r.c[i]?(r.c[i].v!=null?String(r.c[i].v):''):''; });
-        if(Object.values(obj).some(function(v){return v.trim();})) rows.push(obj);
-      });
-    }
+    try{
+      if(data&&data.table&&data.table.rows){
+        var cols=data.table.cols.map(function(c){ return c.label||c.id||''; });
+        data.table.rows.forEach(function(r){
+          if(!r.c)return;
+          var obj={};
+          cols.forEach(function(col,i){ 
+            obj[col]=r.c&&r.c[i]&&r.c[i].v!=null?String(r.c[i].v):'';
+          });
+          var hasData=Object.values(obj).some(function(v){return v&&v.trim();});
+          if(hasData) rows.push(obj);
+        });
+      }
+    }catch(err){ console.error('Parse error',name,err); }
     cb(rows);
   };
-  var script=document.createElement('script');
+  
   script.src=url;
-  script.onerror=function(){ delete window[cbName]; cb([]); };
+  script.onerror=function(){ cleanup(); cb([]); };
+  
+  // Timeout de 8 segundos
+  timer=setTimeout(function(){
+    cleanup();
+    console.warn('Timeout loading sheet:',name);
+    cb([]);
+  }, 8000);
+  
   document.head.appendChild(script);
 }
 
