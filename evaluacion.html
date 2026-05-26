@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Evaluación Clínica · Pediatría UNITEC</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0a1628;--surface:#111f38;--surface2:#162340;--border:#1e3a5f;
+      --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+      --teal:#0d9488;--teal-lt:#14b8a6;
+      --purple:#7c3aed;--purple-lt:#8b5cf6;
+      --amber:#d97706;--amber-lt:#f59e0b;
+      --success:#34d399;--danger:#f87171;--warn:#fbbf24;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.25rem;background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(13,148,136,.15) 0%,transparent 70%);}
+
+    /* ── CARD ── */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem 1.75rem;max-width:400px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;overflow:hidden;}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--teal-lt),var(--purple-lt),var(--amber-lt));}
+
+    /* ── HEADER ── */
+    .header{text-align:center;margin-bottom:1.75rem;}
+    .logo{font-size:2.25rem;margin-bottom:.75rem;}
+    .title{font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:.25rem;}
+    .subtitle{font-size:.78rem;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.05em;}
+
+    /* ── STEPS ── */
+    .step{display:none;}
+    .step.active{display:block;}
+    .step-label{font-size:.72rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem;}
+
+    /* ── GPS ── */
+    .gps-box{background:rgba(13,148,136,.08);border:1px solid rgba(13,148,136,.2);border-radius:16px;padding:1.25rem;text-align:center;margin-bottom:1rem;}
+    .gps-icon{font-size:2rem;margin-bottom:.5rem;}
+    .gps-title{font-size:.95rem;font-weight:600;color:var(--text);margin-bottom:.4rem;}
+    .gps-msg{font-size:.8rem;color:var(--muted2);line-height:1.5;margin-bottom:1rem;}
+    .coords{display:none;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;font-family:'DM Mono',monospace;font-size:.75rem;color:var(--success);margin-bottom:.75rem;}
+    .spinner{display:none;width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:.5rem auto;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── INSTRUMENT SELECTOR ── */
+    .instruments{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;}
+    .instrument-btn{
+      display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;
+      border-radius:14px;border:1.5px solid var(--border);background:var(--surface2);
+      cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;
+      text-align:left;width:100%;
+    }
+    .instrument-btn:active{transform:scale(.98);}
+    .instrument-btn.teal:hover,.instrument-btn.teal:focus{border-color:var(--teal);background:rgba(13,148,136,.1);}
+    .instrument-btn.purple:hover,.instrument-btn.purple:focus{border-color:var(--purple);background:rgba(124,58,237,.1);}
+    .instrument-btn.amber:hover,.instrument-btn.amber:focus{border-color:var(--amber);background:rgba(217,119,6,.1);}
+    .instrument-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+    .instrument-icon.teal{background:rgba(13,148,136,.15);}
+    .instrument-icon.purple{background:rgba(124,58,237,.15);}
+    .instrument-icon.amber{background:rgba(217,119,6,.15);}
+    .instrument-info{flex:1;}
+    .instrument-name{font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:.2rem;}
+    .instrument-desc{font-size:.75rem;color:var(--muted2);}
+    .instrument-arrow{color:var(--muted);font-size:1.1rem;}
+
+    /* ── BUTTONS ── */
+    .btn{width:100%;padding:.9rem 1.5rem;border-radius:14px;border:none;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .12s;-webkit-tap-highlight-color:transparent;}
+    .btn:active{opacity:.85;transform:scale(.98);}
+    .btn-primary{background:linear-gradient(135deg,var(--teal),#0891b2);color:#fff;box-shadow:0 4px 20px rgba(13,148,136,.3);}
+    .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted2);margin-top:.75rem;}
+    .btn:disabled{background:#1e3a5f;box-shadow:none;color:var(--muted);cursor:not-allowed;}
+
+    /* ── STATUS ── */
+    .status{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.75rem;min-height:1rem;}
+    .status.ok{color:var(--success);}
+    .status.err{color:var(--danger);}
+
+    /* ── IOS GUIDE ── */
+    .ios-guide{display:none;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:12px;padding:.9rem;margin-bottom:.9rem;text-align:left;}
+    .ios-guide strong{color:var(--warn);font-size:.78rem;display:block;margin-bottom:.4rem;}
+    .ios-guide ol{color:var(--muted2);font-size:.75rem;padding-left:1.1rem;line-height:1.8;}
+
+    /* ── PROGRESS DOTS ── */
+    .dots{display:flex;justify-content:center;gap:.4rem;margin-bottom:1.25rem;}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .2s;}
+    .dot.active{background:var(--teal);}
+    .dot.done{background:var(--success);}
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="header">
+    <div class="logo">🏥</div>
+    <div class="title">Supervisión Clínica</div>
+    <div class="subtitle">Pediatría · FCS / UNITEC</div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="dots">
+    <div class="dot active" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+  </div>
+
+  <!-- STEP 1: GPS -->
+  <div class="step active" id="step-gps">
+    <div class="step-label">Paso 1 de 2 — Ubicación</div>
+    <div class="gps-box">
+      <div class="gps-icon" id="gpsIcon">📍</div>
+      <div class="spinner" id="gpsSpinner"></div>
+      <div class="gps-title" id="gpsTitle">Registrar ubicación</div>
+      <div class="gps-msg" id="gpsMsg">Toca el botón para compartir tu ubicación. Esto ayuda al coordinador a verificar que la evaluación se realizó en el lugar correcto.</div>
+      <div class="coords" id="coordsBox"><span id="coordsText"></span></div>
+      <div class="ios-guide" id="iosGuide">
+        <strong>⚙️ Activa la ubicación en Safari:</strong>
+        <ol>
+          <li>Abre <b>Ajustes</b> del iPhone</li>
+          <li>Baja hasta <b>Safari → Ubicación</b></li>
+          <li>Selecciona <b>"Preguntar"</b> o <b>"Permitir"</b></li>
+          <li>Vuelve aquí y toca <b>Reintentar</b></li>
+        </ol>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="gpsBtn" onclick="pedirUbicacion()">📍 Compartir ubicación</button>
+    <button class="btn btn-ghost" onclick="saltarGPS()">Continuar sin ubicación →</button>
+    <div class="status" id="gpsStatus"></div>
+  </div>
+
+  <!-- STEP 2: Instrumento -->
+  <div class="step" id="step-instrumento">
+    <div class="step-label">Paso 2 de 2 — Selecciona el instrumento</div>
+    <div class="instruments">
+      <button class="instrument-btn teal" onclick="irAFormulario('minicex')">
+        <div class="instrument-icon teal">📋</div>
+        <div class="instrument-info">
+          <div class="instrument-name">Mini-CEX</div>
+          <div class="instrument-desc">Evaluación clínica directa · 20 min</div>
+        </div>
+        <div class="instrument-arrow">›</div>
+      </button>
+      <button class="instrument-btn purple" onclick="irAFormulario('dops')">
+        <div class="instrument-icon purple">🔬</div>
+        <div class="instrument-info">
+          <div class="instrument-name">DOPS</div>
+          <div class="instrument-desc">Observación de procedimientos</div>
+        </div>
+        <div class="instrument-arrow">›</div>
+      </button>
+      <button class="instrument-btn amber" onclick="irAFormulario('omp')">
+        <div class="instrument-icon amber">⏱</div>
+        <div class="instrument-info">
+          <div class="instrument-name">One Minute Preceptor</div>
+          <div class="instrument-desc">Presentación de caso clínico</div>
+        </div>
+        <div class="instrument-arrow">›</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════
+  //  CONFIGURACIÓN
+  // ══════════════════════════════════════════════
+  var FORMS = {
+    minicex: 'https://docs.google.com/forms/d/e/1FAIpQLSeve8XFZ-ruN0CdcxU-KQLDHaNkRavSTvknLIfXuoWCIijSpA/viewform',
+    dops:    'https://docs.google.com/forms/d/e/1FAIpQLSd_AMz_ftpIKmDQg8iJQkV8fGdCSTfjhaE0ijfzSHullElJnw/viewform',
+    omp:     'https://docs.google.com/forms/d/e/1FAIpQLSd0SDUCtdbh8I7Uaww8liS8dvhjj49XSp059goIrc8pJPg3Pg/viewform'
+  };
+  var GPS_URL = 'https://script.google.com/macros/s/AKfycbwxb_9KcSb52THvOS4pCO4yrhMRqSgmf2eGE96SO2OuD1nIRWlLfM1CO0xBaX-67vq8/exec';
+  // ══════════════════════════════════════════════
+
+  var gpsData = null;
+  var intentos = 0, MAX = 3, watchId = null, yaResuelto = false, timerIOS = null;
+  var esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var sessionID = 'S-' + Date.now().toString(36).toUpperCase();
+
+  // ── GPS UI ──
+  function gpsUI(estado, texto) {
+    var icon = document.getElementById('gpsIcon');
+    var spinner = document.getElementById('gpsSpinner');
+    var title = document.getElementById('gpsTitle');
+    var msg = document.getElementById('gpsMsg');
+    var btn = document.getElementById('gpsBtn');
+    var st = document.getElementById('gpsStatus');
+    var ios = document.getElementById('iosGuide');
+    var cb = document.getElementById('coordsBox');
+
+    ios.style.display = 'none'; cb.style.display = 'none'; st.className = 'status';
+
+    if (estado === 'buscando') {
+      icon.style.display = 'none'; spinner.style.display = 'block';
+      title.textContent = 'Obteniendo ubicación…';
+      msg.textContent = esIOS ? 'Toca "Permitir" cuando Safari pregunte.' : 'Mantén la pantalla abierta.';
+      btn.disabled = true; btn.textContent = '⏳ Buscando…';
+      st.textContent = texto || '';
+    }
+    if (estado === 'error') {
+      icon.style.display = 'block'; icon.textContent = '⚠️'; spinner.style.display = 'none';
+      title.textContent = 'No se pudo obtener la ubicación';
+      msg.innerHTML = texto || 'Ocurrió un error.';
+      btn.disabled = false; btn.textContent = '🔄 Reintentar';
+      st.className = 'status err'; st.textContent = 'Intento ' + intentos + '/' + MAX;
+      if (esIOS) ios.style.display = 'block';
+    }
+    if (estado === 'ok') {
+      icon.style.display = 'block'; icon.textContent = '✅'; spinner.style.display = 'none';
+      title.textContent = '¡Ubicación registrada!';
+      msg.textContent = 'Ahora selecciona el instrumento de evaluación.';
+      btn.style.display = 'none';
+      document.querySelector('.btn-ghost').style.display = 'none';
+      cb.style.display = 'block';
+      st.className = 'status ok'; st.textContent = texto || '';
+      // Avanzar al paso 2 automáticamente
+      setTimeout(function() { irAPaso2(); }, 1200);
+    }
+  }
+
+  function limpiar() {
+    if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+    if (timerIOS !== null) { clearTimeout(timerIOS); timerIOS = null; }
+  }
+
+  function enviarGPS(lat, lng, acc) {
+    var cbName = 'gps_' + Date.now();
+    window[cbName] = function() { delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); };
+    var url = GPS_URL + '?callback=' + cbName + '&form=selector&lat=' + lat.toFixed(6) + '&lng=' + lng.toFixed(6) + '&acc=' + acc + '&sid=' + sessionID;
+    var script = document.createElement('script');
+    script.src = url;
+    script.onerror = function() { delete window[cbName]; };
+    setTimeout(function() { if (window[cbName]) { delete window[cbName]; } }, 4000);
+    document.head.appendChild(script);
+  }
+
+  function onExito(pos) {
+    if (yaResuelto) return; yaResuelto = true; limpiar();
+    var lat = pos.coords.latitude, lng = pos.coords.longitude, acc = Math.round(pos.coords.accuracy);
+    gpsData = { lat: lat, lng: lng, acc: acc, sid: sessionID };
+    document.getElementById('coordsText').textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+    gpsUI('ok', 'Precisión: ±' + acc + ' m');
+    enviarGPS(lat, lng, acc);
+  }
+
+  function onError(err) {
+    if (yaResuelto) return; yaResuelto = true; limpiar();
+    var msgs = {
+      1: '🔒 Permiso denegado.<br><small>Revisa los ajustes de ubicación.</small>',
+      2: '📡 Sin señal GPS.<br><small>Activa el GPS e inténtalo de nuevo.</small>',
+      3: '⏱ Tiempo agotado.<br><small>Sal a un lugar abierto.</small>'
+    };
+    if (err && err.code === 1) { gpsUI('error', msgs[1]); return; }
+    if (intentos < MAX) { gpsUI('buscando', 'Reintentando (' + intentos + '/' + MAX + ')…'); setTimeout(solicitarGPS, 1800); }
+    else { gpsUI('error', msgs[err ? err.code : 2] || 'Error desconocido.'); }
+  }
+
+  function solicitarGPS() {
+    intentos++; yaResuelto = false;
+    if (esIOS) {
+      timerIOS = setTimeout(function() { onError({ code: 3 }); }, 20000);
+      watchId = navigator.geolocation.watchPosition(onExito, onError, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+    } else {
+      navigator.geolocation.getCurrentPosition(onExito, onError, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+    }
+  }
+
+  function pedirUbicacion() {
+    if (!navigator.geolocation) { saltarGPS(); return; }
+    intentos = 0; yaResuelto = false;
+    gpsUI('buscando'); solicitarGPS();
+  }
+
+  function saltarGPS() {
+    limpiar(); irAPaso2();
+  }
+
+  // ── NAVEGACIÓN ──
+  function irAPaso2() {
+    document.getElementById('step-gps').classList.remove('active');
+    document.getElementById('step-instrumento').classList.add('active');
+    document.getElementById('dot1').classList.remove('active');
+    document.getElementById('dot1').classList.add('done');
+    document.getElementById('dot2').classList.add('active');
+  }
+
+  function irAFormulario(tipo) {
+    var url = FORMS[tipo];
+    if (gpsData) {
+      url += '?usp=pp_url';
+    }
+    window.location.href = url;
+  }
+</script>
+</body>
+</html>
